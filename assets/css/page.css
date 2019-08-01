@@ -48,10 +48,11 @@ input[type="search"]:focus {
 }
 
 #found-stations {
-  margin: 1em 0 0;
+  margin: 1em 0 1em;
   padding: 0;
   max-width: 20em;
 }
+
 .found-station {
   list-style: none;
   padding: 0.2em 0;
@@ -61,4 +62,27 @@ input[type="search"]:focus {
 .found-station button {
   width: 100%;
   margin: 0;
+}
+
+#tides {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+#tides p {
+  margin: 0;
+  padding: 0 0.5em 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#tides p:last-child {
+  border-right: none;
+}
+
+#tides p.low {
+  padding-top: 2em;
+}
+
+#tides p.high {
+  padding-bottom: 2em;
 }
