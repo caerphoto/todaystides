@@ -91,6 +91,7 @@ input[type="search"]:focus {
 #tides p.low {
   padding-top: 2em;
   line-height: 1;
+  border-bottom: 1px solid #8af;
 }
 
 #tides p.low::after {
@@ -100,6 +101,7 @@ input[type="search"]:focus {
 #tides p.high {
   padding-bottom: 2em;
   line-height: 1.15;
+  border-top: 1px solid #8af;
 }
 
 #tides p.high::before {
