@@ -6,9 +6,13 @@ const $tides = $('#tides');
 
 let searchTimer = null;
 
+function createEl(elementType) {
+  return document.createElement(elementType);
+}
+
 function createResultItem(station) {
-  const $li = document.createElement('li');
-  const $btn = document.createElement('button');
+  const $li = createEl('li');
+  const $btn = createEl('button');
   $li.classList.add('found-station');
   $li.dataset.id = station.Id;
 
@@ -52,12 +56,16 @@ function renderTideData(data) {
   $tides.innerHTML = '';
 
   normalizeTideData(data).forEach(item => {
-    const $p = document.createElement('p');
+    const $p = createEl('p');
     const hour = pad(item.DateTime.getHours());
     const minute = pad(item.DateTime.getMinutes());
     const time = `${hour}:${minute}`;
-    $p.appendChild(document.createTextNode(`${item.EventType}: ${time}`));
+
+    if (item.EventType === 'High') $p.appendChild(createEl('br'));
+    $p.appendChild(document.createTextNode(time));
     $p.classList.add(item.EventType.toLowerCase());
+    if (item.EventType === 'Low') $p.appendChild(createEl('br'));
+
     $frag.appendChild($p);
   });
 

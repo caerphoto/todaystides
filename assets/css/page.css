@@ -1,16 +1,16 @@
 html {
   margin: 0;
   padding: 0;
-  height: 100vh;
 }
 
 body {
-  min-height: 100vh;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 1em;
   max-width: 40em;
-  display: grid;
-  grid-template-rows: 1fr auto;
+}
+
+.main {
+  margin-bottom: 2em;
 }
 
 button,
@@ -48,9 +48,9 @@ input[type="search"]:focus {
 }
 
 #found-stations {
-  margin: 1em 0 1em;
+  margin: 1em auto 1em;
   padding: 0;
-  max-width: 20em;
+  max-width: 25em;
 }
 
 .found-station {
@@ -73,6 +73,7 @@ input[type="search"]:focus {
   margin: 0;
   padding: 0 0.5em 0;
   border-right: 1px solid rgba(0, 0, 0, 0.2);
+  text-align: center;
 }
 
 #tides p:last-child {
@@ -81,8 +82,18 @@ input[type="search"]:focus {
 
 #tides p.low {
   padding-top: 2em;
+  line-height: 1;
+}
+
+#tides p.low::after {
+  content: "↓";
 }
 
 #tides p.high {
   padding-bottom: 2em;
+  line-height: 1.15;
+}
+
+#tides p.high::before {
+  content: "↑";
 }
