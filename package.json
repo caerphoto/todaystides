@@ -11,5 +11,8 @@
     "chart"
   ],
   "author": "Andy Farrell",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "ssl-root-cas": "^1.3.1"
+  }
 }
