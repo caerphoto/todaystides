@@ -13,6 +13,7 @@
   "author": "Andy Farrell",
   "license": "ISC",
   "dependencies": {
+    "mime-types": "^2.1.24",
     "ssl-root-cas": "^1.3.1"
   }
 }

@@ -2,9 +2,30 @@
 <html>
   <head>
     <title>Today’s Tides</title>
+    <link rel="stylesheet" href="/assets/css/page.css">
   </head>
   <body>
-    <h1>Today’s Tides</h1>
+    <section class="main">
+      <h1>Today’s Tides</h1>
+
+      <form action="#">
+        <label for="station-name">Find station by name</label>
+        <input type="search" id="station-name">
+      </form>
+      <ul id="found-stations"></ul>
+    </section>
+
+    <footer>
+      <p>Contains ADMIRALTY ® tidal data: © Crown copyright and database right.</p>
+    </footer>
+
+    <script>
+      const CONFIG = {
+      searchPath: '/find_station?name=',
+      tideDataPath: '/tides?id='
+        };
+    </script>
+    <script src="assets/javascript/page.js"></script>
   </body>
 </html>
 
