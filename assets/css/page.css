@@ -10,7 +10,9 @@ body {
 }
 
 .main {
-  margin-bottom: 2em;
+  padding-bottom: 2em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5em;
 }
 
 button,
@@ -67,6 +69,12 @@ input[type="search"]:focus {
 #tides {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+#tides h2 {
+  font-size: 1.1rem;
+  font-weight: normal;
+  grid-column: 1/5;
 }
 
 #tides p {

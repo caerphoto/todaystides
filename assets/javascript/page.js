@@ -15,6 +15,7 @@ function createResultItem(station) {
   const $btn = createEl('button');
   $li.classList.add('found-station');
   $li.dataset.id = station.Id;
+  $li.dataset.name = station.Name;
 
   $btn.appendChild(document.createTextNode(station.Name));
   $btn.type = 'button';
@@ -50,10 +51,14 @@ function pad(num) {
   return num < 10 ? '0' + num : num;
 }
 
-function renderTideData(data) {
+function renderTideData(data, stationName) {
   const $frag = document.createDocumentFragment();
+  const $info = createEl('h2');
 
   $tides.innerHTML = '';
+
+  $info.appendChild(document.createTextNode(`Tide information for ${stationName}:`));
+  $frag.appendChild($info);
 
   normalizeTideData(data).forEach(item => {
     const $p = createEl('p');
@@ -104,7 +109,9 @@ $search.addEventListener('input', (event) => {
 $results.addEventListener('click', (event) => {
   const $li = event.target.closest('li.found-station');
   const path = CONFIG.tideDataPath + $li.dataset.id;
-  request(path).then(renderTideData);
+  request(path).then(data => {
+    renderTideData(data, $li.dataset.name);
+  });
 });
 
 $search.focus();
