@@ -1,0 +1,15 @@
+{
+  "name": "tidechart",
+  "version": "1.0.0",
+  "description": "Shows a tide chart for today",
+  "main": "tide_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "tide",
+    "chart"
+  ],
+  "author": "Andy Farrell",
+  "license": "ISC"
+}
