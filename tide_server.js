@@ -1,3 +1,4 @@
+/*eslint no-console: "off" */
 const FS = require('fs');
 const PATH = require('path');
 const BASE_API_PATH = '/uktidalapi/api/V1/Stations';
@@ -29,7 +30,13 @@ function request(path) {
     const request = HTTPS.request(reqOptions, (response) => {
       let resData = '';
       response.on('data', (data) => resData += data);
-      response.on('end', () => resolve(JSON.parse(resData)));
+      response.on('end', () => {
+        try {
+          resolve(JSON.parse(resData));
+        } catch (err) {
+          resolve(null);
+        }
+      });
     });
 
     request.end();
@@ -75,6 +82,7 @@ function requestStationsData(name) {
 
 async function requestTideData(stationId) {
   const data = await request(BASE_API_PATH + TIDE_API_PATH.replace('**STATION_ID**', stationId));
+  if (data === null) return { error: 'Too many requests. Please try again in 20 seconds.' };
   return normalizeTideData(data);
 }
 
@@ -93,6 +101,15 @@ async function getTides(stationId) {
   return await requestTideData(stationId);
 }
 
+async function getStationData(stationId) {
+  const rawData = await request(BASE_API_PATH + '/' + stationId);
+
+  return {
+    Name: rawData.properties.Name,
+    Id: rawData.properties.Id
+  };
+}
+
 async function fetchAsset(path, response) {
   const stream = FS.createReadStream(path);
   const contentType = MIME.contentType(PATH.extname(path)) || 'application/octet-stream';
@@ -102,8 +119,28 @@ async function fetchAsset(path, response) {
   stream.on('end', () => console.log(' > Served asset', path));
 }
 
-function fetchPage(response) {
-  return FS.createReadStream('page.html', { encoding: 'utf8' }).pipe(response);
+function fetchPage(response, url) {
+  const stationId = url.query.station;
+  return new Promise(resolve => {
+    FS.readFile('page.html', { encoding: 'utf8' }, (err, pageText) => {
+      if (err) {
+        response.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        response.statuscode = 500;
+        return resolve('HTTP 500: Server error');
+      }
+
+      response.setHeader('Content-Type', 'text/html; charset=utf-8');
+      if (!stationId) {
+        pageText = pageText.replace('#STATION_DATA#', 'null');
+        return resolve(pageText);
+      }
+
+      getStationData(stationId).then(stationData => {
+        pageText = pageText.replace('#STATION_DATA#', JSON.stringify(stationData));
+        resolve(pageText);
+      });
+    });
+  });
 }
 
 async function render404(response, notFoundPath) {
@@ -121,9 +158,10 @@ function requestDispatcher(request, response) {
   response.statusCode = 200;
 
   switch (true) {
-    case path === '/':
-      response.setHeader('Content-Type', 'text/html; charset=utf-8');
-      fetchPage(response);
+    case url.pathname === '/':
+      fetchPage(response, url).then(responseText => {
+        response.end(responseText);
+      });
       break;
     case /^\/assets\//.test(path):
       fetchAsset('.' + url.pathname, response);

@@ -6,6 +6,14 @@ const $tides = $('#tides');
 
 let searchTimer = null;
 
+function makeTitle(stationName) {
+  return stationName + ' &middot; Today’s Tides';
+}
+
+function makeUrl(stationId) {
+  return '/?station=' + stationId;
+}
+
 function createEl(elementType) {
   return document.createElement(elementType);
 }
@@ -38,9 +46,12 @@ function renderStationSearchResults(stations) {
 
 function normalizeTideData(data) {
   const normalized = data.map(item => {
-    item.DateTime = new Date(item.DateTime);
-    item.EventType = item.EventType === 'HighWater' ? 'High' : 'Low';
-    return item;
+    const date = new Date(item.DateTime);
+    const type = item.EventType === 'HighWater' ? 'High' : 'Low';
+    return Object.assign({}, item, {
+      DateTime: date,
+      EventType: type
+    });
   });
 
   normalized.sort((a, b) => a.DateTime - b.DateTime);
@@ -94,6 +105,20 @@ function findStations(name) {
   request(path).then(renderStationSearchResults);
 }
 
+function fetchTideData(id) {
+  return new Promise(resolve => {
+    const path = CONFIG.tideDataPath + id;
+    request(path).then(data => {
+      resolve(data);
+    });
+  });
+}
+
+function loadFromState(state) {
+  window.title = makeTitle(state.Name);
+  renderTideData(state.tideData, state.Name);
+}
+
 $search.addEventListener('input', (event) => {
   const searchTerm = event.target.value;
 
@@ -108,10 +133,35 @@ $search.addEventListener('input', (event) => {
 
 $results.addEventListener('click', (event) => {
   const $li = event.target.closest('li.found-station');
-  const path = CONFIG.tideDataPath + $li.dataset.id;
-  request(path).then(data => {
-    renderTideData(data, $li.dataset.name);
+  fetchTideData($li.dataset.id).then(tideData => {
+    if (tideData.error) return alert(tideData.error);
+
+    const historyData = {
+      Name: $li.dataset.name,
+      Id: $li.dataset.id,
+      tideData: tideData
+    };
+    renderTideData(tideData, $li.dataset.name);
+    history.pushState(historyData, $li.dataset.name, '/?station=' + $li.dataset.id);
   });
 });
+
+window.addEventListener('popstate', (event) => {
+  if (event.state) loadFromState(event.state);
+});
+
+if (history.state) loadFromState(history.state);
+
+if (CONFIG.stationData) {
+  let data = CONFIG.stationData;
+
+  fetchTideData(data.Id).then(tideData => {
+    if (tideData.error) return alert(tideData.error);
+
+    data.tideData = tideData;
+    history.replaceState(data, makeTitle(data.Name), makeUrl(data.Id));
+    loadFromState(data);
+  });
+}
 
 $search.focus();
