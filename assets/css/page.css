@@ -86,7 +86,7 @@ input[type="search"]:focus {
 #tides {
   overflow: hidden;
   position: relative;
-  height: 10em;
+  height: 12em;
 }
 
 #tides h2 {
