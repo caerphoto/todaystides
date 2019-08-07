@@ -58,23 +58,6 @@ function simplifiedStationsData(data) {
   return data.features.map((feature) => feature.properties);
 }
 
-function organizeStations(stationData) {
-  const basicData = simplifiedStationsData(stationData);
-  const countries = basicData.reduce((obj, station) => {
-    const c = station.Country;
-    if (obj[c]) {
-      obj[c].push(station);
-    } else {
-      obj[c] = [station];
-    }
-    return obj;
-  }, {});
-
-  Object.values(countries).forEach(country => country.sort(sortByName));
-
-  return countries;
-}
-
 function normalizeTideData(tideData) {
   return tideData.map(td => {
     td.DateTime = new Date(td.DateTime);
@@ -93,10 +76,6 @@ async function requestTideData(stationId) {
   return normalizeTideData(data);
 }
 
-async function getGroupedStations() {
-  return organizeStations(await requestStationsData());
-}
-
 async function findStation(stationName) {
   const stationsData = await requestStationsData(stationName);
   const simplifiedData = simplifiedStationsData(stationsData);
@@ -109,6 +88,7 @@ async function getTides(stationId) {
 }
 
 async function getStationData(stationId) {
+  if (!stationId) return null;
   const rawData = await request(BASE_API_PATH + '/' + stationId);
 
   return {
@@ -136,15 +116,11 @@ function fetchPage(response, stationId) {
       }
 
       response.setHeader('Content-Type', 'text/html; charset=utf-8');
-      if (!stationId) {
-        pageText = pageText.replace('#STATION_DATA#', 'null');
-        return resolve(pageText);
-      }
+      const pathReplacer = new RegExp('#BASE_PATH#', 'g');
+      pageText = pageText.replace(pathReplacer, CONFIG.basePath);
 
       getStationData(stationId).then(stationData => {
-        const pathReplacer = new RegExp('#BASE_PATH#', 'g');
         pageText = pageText.replace('#STATION_DATA#', JSON.stringify(stationData));
-        pageText = pageText.replace(pathReplacer, CONFIG.basePath);
         resolve(pageText);
       });
     });
@@ -165,10 +141,9 @@ function requestDispatcher(request, response) {
 
   response.statusCode = 200;
 
-  path = path.replace(pathRemap, '');
-  if (path === '') path = '/';
-  href = href.replace(pathRemap, '');
-  console.log('Serving URL', href);
+  path = path.replace(pathRemap, '') || '/';
+  href = href.replace(pathRemap, '') || '/';
+  console.log('Serving URL:', href);
 
   switch (true) {
     case path === '/':
@@ -200,4 +175,5 @@ require('http').createServer(function (request, response) {
   request.addListener('end', () => requestDispatcher(request, response)).resume();
 }).listen(CONFIG.listenPort, CONFIG.listenIp);
 
+console.log(`Running in ${MODE} with base path ${CONFIG.basePath}`);
 console.log(`Listening to ${CONFIG.listenIp} on port ${CONFIG.listenPort} ...`);
