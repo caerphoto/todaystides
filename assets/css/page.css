@@ -84,8 +84,9 @@ input[type="search"]:focus {
 }
 
 #tides {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  overflow: hidden;
+  position: relative;
+  height: 10em;
 }
 
 #tides h2 {
@@ -95,10 +96,12 @@ input[type="search"]:focus {
 }
 
 #tides p {
+  position: absolute;
   margin: 0;
-  padding: 0 0.5em 0;
-  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0;
   text-align: center;
+  line-height: 1;
+  height: 2em;
 }
 
 #tides p:last-child {
@@ -107,20 +110,34 @@ input[type="search"]:focus {
 
 #tides p.low {
   padding-top: 2em;
-  line-height: 1;
-  border-bottom: 1px solid #8af;
 }
 
 #tides p.low::after {
   content: "↓";
+  color: #8af;
 }
 
 #tides p.high {
   padding-bottom: 2em;
-  line-height: 1.15;
-  border-top: 1px solid #8af;
+  /* border-top: 1px solid #8af; */
 }
 
 #tides p.high::before {
   content: "↑";
+  color: #8af;
+}
+
+.hour-markers {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  clear: both;
+  border-left: 1px solid rgba(0, 0, 0, 0.3);
+}
+p.water-mark + .hour-markers {
+  margin-top: 4em;
+}
+.hour-marker {
+  height: 1rem;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  font-size: 0.4rem;
 }

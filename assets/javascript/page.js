@@ -6,6 +6,8 @@ const $tides = $('#tides');
 const $searching = $('#searching-spinner');
 const $loadingTides = $('#tides-spinner');
 
+const ONE_DAY = 1000 * 60 * 60 * 24;
+
 let searchTimer = null;
 
 function makeTitle(stationName) {
@@ -68,6 +70,45 @@ function renderTidesLoading() {
   $tides.innerHTML = '<span class="loading-spinner loading"></span> Loading tide data&hellip;';
 }
 
+function renderHourMarkers() {
+  const $frag = document.createDocumentFragment();
+  const $box = createEl('div');
+  $box.className = 'hour-markers';
+
+  for (let i = 0; i < 24; i += 1) {
+    const $marker = createEl('div');
+    $marker.className = 'hour-marker';
+    $marker.appendChild(document.createTextNode(i));
+    $box.appendChild($marker);
+  }
+  $frag.appendChild($box);
+  return $frag;
+}
+
+function dateAtMidnight(dateTime) {
+  const newDate = new Date(dateTime);
+  ['Hours', 'Minutes', 'Seconds', 'Milliseconds'].forEach(unit => {
+    newDate['set' + unit](0);
+  });
+  return newDate;
+}
+
+function calculateWidth(index, items) {
+  const midnight = dateAtMidnight(items[0].DateTime);
+  const endOfDay = new Date(midnight);
+  endOfDay.setHours(24);
+  const thisTime = items[index].DateTime;
+  const prevTime = index ? items[index - 1].DateTime : null;
+  let size;
+
+  size = thisTime - midnight;
+  // for (let i = )
+
+  const containerWidth = $tides.getBoundingClientRect().width;
+
+  return ((size * 2) / ONE_DAY) * containerWidth + 'px';
+}
+
 function renderTideData(data, stationName) {
   const $frag = document.createDocumentFragment();
   const $info = createEl('h2');
@@ -77,7 +118,9 @@ function renderTideData(data, stationName) {
   $info.appendChild(document.createTextNode(`Tide information for ${stationName}:`));
   $frag.appendChild($info);
 
-  normalizeTideData(data).forEach(item => {
+  $frag.appendChild(renderHourMarkers());
+
+  normalizeTideData(data).forEach((item, index, normalizedData) => {
     const $p = createEl('p');
     const hour = pad(item.DateTime.getHours());
     const minute = pad(item.DateTime.getMinutes());
@@ -86,11 +129,15 @@ function renderTideData(data, stationName) {
     if (item.EventType === 'High') $p.appendChild(createEl('br'));
     $p.appendChild(document.createTextNode(time));
     $p.classList.add(item.EventType.toLowerCase());
+    $p.classList.add('water-mark');
     if (item.EventType === 'Low') $p.appendChild(createEl('br'));
+
+    $p.style.width = calculateWidth(index, normalizedData);
 
     $frag.appendChild($p);
   });
 
+  $frag.appendChild(renderHourMarkers());
   $tides.appendChild($frag);
 }
 
@@ -152,7 +199,7 @@ $results.addEventListener('click', (event) => {
       Id: $li.dataset.id,
       tideData: tideData
     };
-    renderTideData(tideData, $li.dataset.name);
+    loadFromState(historyData);
     history.pushState(historyData, makeTitle($li.dataset.name), makeUrl($li.dataset.id));
   });
 });
@@ -167,7 +214,7 @@ window.addEventListener('popstate', (event) => {
 
 if (history.state) loadFromState(history.state);
 
-if (CONFIG.stationData) {
+if (CONFIG.stationData && !history.state) {
   let data = CONFIG.stationData;
 
   fetchTideData(data.Id).then(tideData => {
