@@ -1,6 +1,13 @@
 /*eslint no-console: "off" */
 const FS = require('fs');
 const PATH = require('path');
+
+const MODE =process.env.MODE;
+if (!MODE) {
+  console.error('No environment mode specified. Specify MODE as either "production" or "development"');
+  process.exit(1);
+}
+const CONFIG = JSON.parse(FS.readFileSync('config.json', { encoding: 'utf8' }))[MODE];
 const BASE_API_PATH = '/uktidalapi/api/V1/Stations';
 const TIDE_API_PATH = '/**STATION_ID**/TidalEvents?duration=1';
 
@@ -119,8 +126,7 @@ async function fetchAsset(path, response) {
   stream.on('end', () => console.log(' > Served asset', path));
 }
 
-function fetchPage(response, url) {
-  const stationId = url.query.station;
+function fetchPage(response, stationId) {
   return new Promise(resolve => {
     FS.readFile('page.html', { encoding: 'utf8' }, (err, pageText) => {
       if (err) {
@@ -136,7 +142,9 @@ function fetchPage(response, url) {
       }
 
       getStationData(stationId).then(stationData => {
+        const pathReplacer = new RegExp('#BASE_PATH#', 'g');
         pageText = pageText.replace('#STATION_DATA#', JSON.stringify(stationData));
+        pageText = pageText.replace(pathReplacer, CONFIG.basePath);
         resolve(pageText);
       });
     });
@@ -151,20 +159,25 @@ async function render404(response, notFoundPath) {
 
 function requestDispatcher(request, response) {
   const url = URL.parse(request.url, true);
-  const path = url.href;
-
-  console.log('Serving URL', path);
+  let path = url.pathname;
+  let href = url.href;
+  const pathRemap = new RegExp('^' + CONFIG.basePath);
 
   response.statusCode = 200;
 
+  path = path.replace(pathRemap, '');
+  if (path === '') path = '/';
+  href = href.replace(pathRemap, '');
+  console.log('Serving URL', href);
+
   switch (true) {
-    case url.pathname === '/':
-      fetchPage(response, url).then(responseText => {
+    case path === '/':
+      fetchPage(response, url.query.station).then(responseText => {
         response.end(responseText);
       });
       break;
-    case /^\/assets\//.test(path):
-      fetchAsset('.' + url.pathname, response);
+    case /^\/assets\/.*/.test(path):
+      fetchAsset('.' + path, response);
       break;
     case /^\/find_station/.test(path):
       findStation(url.query.name).then(stations => {
@@ -179,20 +192,12 @@ function requestDispatcher(request, response) {
       });
       break;
     default:
-      render404(response, path);
+      render404(response, href);
   }
 }
 
 require('http').createServer(function (request, response) {
   request.addListener('end', () => requestDispatcher(request, response)).resume();
-}).listen('4000', '0.0.0.0');
+}).listen(CONFIG.listenPort, CONFIG.listenIp);
 
-/*
-findLocal('gorles').then(stations => {
-  const first = stations[0];
-  console.log(first.Name, first.Id);
-  return getTides(first.Id);
-}).then(tides => {
-  console.log(tides);
-});
-*/
+console.log(`Listening to ${CONFIG.listenIp} on port ${CONFIG.listenPort} ...`);

@@ -3,7 +3,7 @@
   <head>
     <title>Today’s Tides</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <link rel="stylesheet" href="/assets/css/page.css">
+    <link rel="stylesheet" href="#BASE_PATH#/assets/css/page.css">
   </head>
   <body>
     <section class="main">
@@ -25,11 +25,11 @@
     <script>
       const CONFIG = {
         stationData: #STATION_DATA#,
-        searchPath: '/find_station?name=',
-        tideDataPath: '/tides?id='
+        searchPath: '#BASE_PATH#/find_station?name=',
+        tideDataPath: '#BASE_PATH#/tides?id='
       };
     </script>
-    <script src="assets/javascript/page.js"></script>
+    <script src="#BASE_PATH#/assets/javascript/page.js"></script>
   </body>
 </html>
 

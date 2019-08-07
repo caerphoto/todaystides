@@ -11,7 +11,7 @@ function makeTitle(stationName) {
 }
 
 function makeUrl(stationId) {
-  return '/?station=' + stationId;
+  return window.location.pathname + '?station=' + stationId;
 }
 
 function createEl(elementType) {
