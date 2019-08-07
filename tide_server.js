@@ -121,7 +121,6 @@ function fetchPage(response, stationId) {
 
       getStationData(stationId).then(stationData => {
         pageText = pageText.replace('#STATION_DATA#', JSON.stringify(stationData));
-        console.log(' > Served page.html');
         resolve(pageText);
       });
     });
@@ -150,6 +149,7 @@ function requestDispatcher(request, response) {
     case path === '/':
       fetchPage(response, url.query.station).then(responseText => {
         response.end(responseText);
+        console.log(' > Served page.html');
       });
       break;
     case /^\/assets\/.*/.test(path):
@@ -159,12 +159,14 @@ function requestDispatcher(request, response) {
       findStation(url.query.name).then(stations => {
         response.setHeader('Content-Type', 'application/json; charset=utf-8');
         response.end(JSON.stringify(stations));
+        console.log(` > Served results for search "${url.query.name}"`);
       });
       break;
     case /^\/tides/.test(path):
       getTides(url.query.id).then(data => {
         response.setHeader('Content-Type', 'application/json; charset=utf-8');
         response.end(JSON.stringify(data));
+        console.log(` > Served tide data station ID "${url.query.id}"`);
       });
       break;
     default:
