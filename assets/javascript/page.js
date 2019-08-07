@@ -142,8 +142,12 @@ $results.addEventListener('click', (event) => {
       tideData: tideData
     };
     renderTideData(tideData, $li.dataset.name);
-    history.pushState(historyData, $li.dataset.name, '/?station=' + $li.dataset.id);
+    history.pushState(historyData, makeTitle($li.dataset.name), makeUrl($li.dataset.id));
   });
+});
+
+document.querySelector('form').addEventListener('submit', (event) => {
+  event.preventDefault();
 });
 
 window.addEventListener('popstate', (event) => {

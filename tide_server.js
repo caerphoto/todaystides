@@ -121,6 +121,7 @@ function fetchPage(response, stationId) {
 
       getStationData(stationId).then(stationData => {
         pageText = pageText.replace('#STATION_DATA#', JSON.stringify(stationData));
+        console.log(' > Served page.html');
         resolve(pageText);
       });
     });
