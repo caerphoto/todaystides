@@ -3,6 +3,8 @@ function $(selector) { return document.querySelector(selector); }
 const $search = $('#station-name');
 const $results = $('#found-stations');
 const $tides = $('#tides');
+const $searching = $('#searching-spinner');
+const $loadingTides = $('#tides-spinner');
 
 let searchTimer = null;
 
@@ -62,6 +64,10 @@ function pad(num) {
   return num < 10 ? '0' + num : num;
 }
 
+function renderTidesLoading() {
+  $tides.innerHTML = '<span class="loading-spinner loading"></span> Loading tide data&hellip;';
+}
+
 function renderTideData(data, stationName) {
   const $frag = document.createDocumentFragment();
   const $info = createEl('h2');
@@ -102,7 +108,11 @@ function request(path) {
 
 function findStations(name) {
   const path = CONFIG.searchPath + encodeURIComponent(name);
-  request(path).then(renderStationSearchResults);
+  $searching.classList.add('loading');
+  request(path).then(data => {
+    $searching.classList.remove('loading');
+    renderStationSearchResults(data);
+  });
 }
 
 function fetchTideData(id) {
@@ -133,6 +143,7 @@ $search.addEventListener('input', (event) => {
 
 $results.addEventListener('click', (event) => {
   const $li = event.target.closest('li.found-station');
+  renderTidesLoading();
   fetchTideData($li.dataset.id).then(tideData => {
     if (tideData.error) return alert(tideData.error);
 

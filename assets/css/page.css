@@ -54,6 +54,18 @@ input[type="search"]:focus {
     inset 1px 1px 3px 0   rgba(0, 0, 150, 0.2);
 }
 
+.loading-spinner {
+  background-image: url('../img/tides-loader.gif');
+  width: 16px;
+  height: 16px;
+  display: none;
+  text-indent: -999em;
+}
+
+.loading-spinner.loading {
+  display: inline-block;
+}
+
 #found-stations {
   margin: 1em auto 1em;
   padding: 0;
