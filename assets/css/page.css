@@ -131,9 +131,12 @@ input[type="search"]:focus {
   display: grid;
   grid-template-columns: repeat(24, 1fr);
   clear: both;
-  border-left: 1px solid rgba(0, 0, 0, 0.3);
+  border-width: 0 0 1px 1px;
+  border-color: rgba(0, 0, 0, 0.3);
+  border-style: solid;
 }
 p.water-mark + .hour-markers {
+  border-width: 1px 0 0 1px;
   margin-top: 4em;
 }
 .hour-marker {
