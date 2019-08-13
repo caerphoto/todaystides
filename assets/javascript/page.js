@@ -125,11 +125,15 @@ function renderChartAxes(ctx, yMax, chartHeight, chartWidth) {
   ctx.stroke();
 }
 
-function renderLabel(ctx, text, x, y, size) {
+function renderLabel(ctx, text, x, y, chartWidth) {
   const textWidth = ctx.measureText(text).width + 6;
-  const boundX = Math.max(x, textWidth / 2);
+  const boundX = Math.min(
+    Math.max(x, textWidth / 2),
+    chartWidth - textWidth / 2
+  );
+
   ctx.fillStyle = '#fff';
-  ctx.fillRect(boundX - textWidth / 2, y, textWidth, size);
+  ctx.fillRect(boundX - textWidth / 2, y, textWidth, LABEL_SIZE);
   ctx.fillStyle = '#444';
   ctx.fillText(text, boundX, y + 2);
 }
@@ -199,9 +203,9 @@ function renderChart($canvas, data) {
 
     renderTick(ctx, x, y, isLow);
     if (isLow) {
-      renderLabel(ctx, label, x, y + 2, fontSize);
+      renderLabel(ctx, label, x, y + 2, width);
     } else {
-      renderLabel(ctx, label, x, y - fontSize - 6, fontSize);
+      renderLabel(ctx, label, x, y - fontSize - 6, width);
     }
 
     prevX = x;
