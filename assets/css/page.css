@@ -85,62 +85,26 @@ input[type="search"]:focus {
 
 #tides {
   overflow: hidden;
-  position: relative;
-  height: 12em;
+  --chart-height: 14rem;
+  height: calc(var(--chart-height) + 6em);
+  --border-color: rgba(0, 0, 0, 0.3);
 }
 
 #tides h2 {
   font-size: 1.1rem;
   font-weight: normal;
-  grid-column: 1/5;
+  height: 2rem;
+  margin: 0;
 }
 
-#tides p {
-  position: absolute;
+#tides canvas {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--chart-height);
+}
+
+#tides p.axis-label {
+  text-align: center;
   margin: 0;
   padding: 0;
-  text-align: center;
-  line-height: 1;
-  height: 2em;
-}
-
-#tides p:last-child {
-  border-right: none;
-}
-
-#tides p.low {
-  padding-top: 2em;
-}
-
-#tides p.low::after {
-  content: "↓";
-  color: #8af;
-}
-
-#tides p.high {
-  padding-bottom: 2em;
-  /* border-top: 1px solid #8af; */
-}
-
-#tides p.high::before {
-  content: "↑";
-  color: #8af;
-}
-
-.hour-markers {
-  display: grid;
-  grid-template-columns: repeat(24, 1fr);
-  clear: both;
-  border-width: 0 0 1px 1px;
-  border-color: rgba(0, 0, 0, 0.3);
-  border-style: solid;
-}
-p.water-mark + .hour-markers {
-  border-width: 1px 0 0 1px;
-  margin-top: 4em;
-}
-.hour-marker {
-  height: 1rem;
-  border-right: 1px solid rgba(0, 0, 0, 0.3);
-  font-size: 0.4rem;
 }

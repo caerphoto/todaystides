@@ -46,6 +46,10 @@ function request(path) {
       });
     });
 
+    request.on('error', () => {
+      resolve(null);
+    });
+
     request.end();
   });
 }
@@ -97,13 +101,16 @@ async function getStationData(stationId) {
   };
 }
 
-async function fetchAsset(path, response) {
-  const stream = FS.createReadStream(path);
+function fetchAsset(path, response) {
   const contentType = MIME.contentType(PATH.extname(path)) || 'application/octet-stream';
   response.setHeader('Content-Type', contentType);
+  const stream = FS.createReadStream(path);
   stream.on('error', () => render404(response, path));
-  stream.on('readable', () => stream.pipe(response));
-  stream.on('end', () => console.log(' > Served asset', path));
+  stream.on('data', (data) => response.write(data));
+  stream.on('end', () => {
+    response.end();
+    console.log(' > Served asset', path);
+  });
 }
 
 function fetchPage(response, stationId) {
