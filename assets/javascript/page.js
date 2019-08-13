@@ -212,9 +212,7 @@ window.addEventListener('popstate', (event) => {
   if (event.state) loadFromState(event.state);
 });
 
-if (history.state) loadFromState(history.state);
-
-if (CONFIG.stationData && !history.state) {
+if (CONFIG.stationData) {
   let data = CONFIG.stationData;
 
   fetchTideData(data.Id).then(tideData => {
@@ -224,6 +222,8 @@ if (CONFIG.stationData && !history.state) {
     history.replaceState(data, makeTitle(data.Name), makeUrl(data.Id));
     loadFromState(data);
   });
+} else if (history.state) {
+  loadFromState(history.state);
 }
 
 $search.focus();
