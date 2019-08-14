@@ -9,6 +9,7 @@ const $loadingTides = $('#tides-spinner');
 const ONE_DAY = 1000 * 60 * 60 * 24;
 const LABEL_SIZE = 30;
 const QUADRATIC_WEIGHT = 60;
+const now = new Date();
 
 let searchTimer = null;
 
@@ -307,10 +308,18 @@ window.addEventListener('popstate', (event) => {
   if (event.state) loadFromState(event.state);
 });
 
-if (history.state) {
+function isSameDay(a, b) {
+  const d1 = new Date(a);
+  const d2 = new Date(b);
+  return ['Date', 'Month', 'FullYear'].every(prop => {
+    return d1['get' + prop] === d2['get' + prop];
+  });
+}
+
+if (history.state && isSameDay(now, history.state.tideData[0].DateTime)) {
   loadFromState(history.state);
-} else if (CONFIG.stationData) {
-  let data = CONFIG.stationData;
+} else if (CONFIG.stationData ) {
+  const data = CONFIG.stationData;
 
   fetchTideData(data.Id).then(tideData => {
     if (tideData.error) return alert(tideData.error);
