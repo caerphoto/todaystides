@@ -153,7 +153,7 @@ function initAssetHashes() {
     const jsName = FS.readdirSync('build/javascript')[0];
     CONFIG.assetHashes = {
       css: cssName.match(/(\.\d+)\.css/)[1],
-      js: jsName.match(/(\.\d+\.min)\.js/)[1]
+      js: jsName.match(/(\.\d+)\.js/)[1]
     };
   }
 }

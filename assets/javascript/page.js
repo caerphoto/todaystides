@@ -73,7 +73,7 @@ function renderStationSearchResults(stations) {
 function normalizeTideData(data) {
   const normalized = data.map(item => {
     const date = new Date(item.DateTime);
-    const type = item.EventType === 'HighWater' ? 'High' : 'Low';
+    const type = /^High/.test(item.EventType) ? 'High' : 'Low';
     return Object.assign({}, item, {
       DateTime: date,
       EventType: type
