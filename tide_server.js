@@ -156,8 +156,6 @@ function initAssetHashes() {
       js: jsName.match(/(\.\d+\.min)\.js/)[1]
     };
   }
-
-  console.log(CONFIG);
 }
 
 function requestDispatcher(request, response) {
@@ -202,7 +200,6 @@ function requestDispatcher(request, response) {
 }
 
 initAssetHashes();
-process.exit();
 
 require('http').createServer(function (request, response) {
   request.addListener('end', () => requestDispatcher(request, response)).resume();
