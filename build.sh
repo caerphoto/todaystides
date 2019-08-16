@@ -10,8 +10,8 @@ INPUT_JS=(
 )
 echo Minifying these files: "${INPUT_JS[@]}"
 
-mkdir $JS_PATH
-mkdir $CSS_PATH
+mkdir -p $JS_PATH
+mkdir -p $CSS_PATH
 rm $JS_PATH/*.js
 rm $CSS_PATH/*.css
 
