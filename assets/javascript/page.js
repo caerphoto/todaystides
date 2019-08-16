@@ -10,8 +10,11 @@ const ONE_DAY = 1000 * 60 * 60 * 24;
 const LABEL_SIZE = 30;
 const QUADRATIC_WEIGHT = 60;
 const now = new Date();
+const DAYS = 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
 
 let searchTimer = null;
+
+let $chart;
 
 function makeTitle(stationName) {
   return stationName + ' &middot; Today’s Tides';
@@ -25,14 +28,30 @@ function createEl(elementType) {
   return document.createElement(elementType);
 }
 
+function appendTextTo($el, text) {
+  return $el.appendChild(document.createTextNode(text));
+}
+
+function normalizeStationName(name) {
+  if (!name) return '';
+  return name.split('').reduce((result, char, index, chars) => {
+    if (index === 0) return char.toLocaleUpperCase();
+    const prevChar = chars[index - 1];
+    if (/[ \-(]/.test(prevChar)) return result + char.toLocaleUpperCase();
+    return result + char.toLocaleLowerCase();
+  }, '');
+}
+
 function createResultItem(station) {
   const $li = createEl('li');
   const $btn = createEl('button');
+  const normalizedName = normalizeStationName(station.Name);
+
   $li.classList.add('found-station');
   $li.dataset.id = station.Id;
-  $li.dataset.name = station.Name;
+  $li.dataset.name = normalizedName;
 
-  $btn.appendChild(document.createTextNode(station.Name));
+  appendTextTo($btn, normalizedName);
   $btn.type = 'button';
 
   $li.appendChild($btn);
@@ -73,6 +92,28 @@ function renderTidesLoading() {
   $tides.innerHTML = '<span class="loading-spinner loading"></span> Loading tide data&hellip;';
 }
 
+function humanizeDate(date) {
+  return DAYS[date.getDay() - 1] + '’s';
+}
+
+function makeChartHeading(stationName) {
+  const $heading = createEl('h2');
+  const $name = createEl('span');
+  const $date = createEl('span');
+  const now = new Date();
+
+  appendTextTo($name, normalizeStationName(stationName));
+  $name.classList.add('station-name');
+  appendTextTo($date, humanizeDate(now));
+
+  $heading.appendChild($date);
+  appendTextTo($heading, ' tide heights (m) at ');
+  $heading.appendChild($name);
+  appendTextTo($heading, ':');
+
+  return $heading;
+}
+
 function dateAtMidnight(dateTime) {
   const newDate = new Date(dateTime);
   ['Hours', 'Minutes', 'Seconds', 'Milliseconds'].forEach(unit => {
@@ -103,7 +144,7 @@ function renderChartAxes(ctx, yMax, chartHeight, chartWidth) {
   // Y axis
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'right';
-  ctx.font = `${LABEL_SIZE}px sans-serif`;
+  ctx.font = `${LABEL_SIZE / 1.4}px sans-serif`;
   for (let i = 0; i < yMax; i += 0.5) {
     const y = yFromTide(i, chartHeight, yMax);
     ctx.moveTo(xAxisStart, y);
@@ -162,7 +203,7 @@ function prepareContextForChart(ctx) {
   ctx.font = `${LABEL_SIZE}px sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 4;
 }
 
 function renderChart($canvas, data) {
@@ -217,24 +258,24 @@ function renderChart($canvas, data) {
   return $canvas;
 }
 
-
 function renderTideData(data, stationName) {
   const $frag = document.createDocumentFragment();
-  const $info = createEl('h2');
-  const $chart = createEl('canvas');
+  const $info = makeChartHeading(stationName);
   const $axisLabel = createEl('p');
 
+  $chart = null;
   $tides.innerHTML = '';
 
-  $info.appendChild(document.createTextNode(`Tide height (m) for ${stationName}:`));
+  $chart = createEl('canvas');
   $frag.appendChild($info);
   $frag.appendChild($chart);
-  $axisLabel.appendChild(document.createTextNode('Time'));
+
+  appendTextTo($axisLabel, 'Time');
   $axisLabel.classList.add('axis-label');
   $frag.appendChild($axisLabel);
 
   $tides.appendChild($frag);
-  renderChart($chart, normalizeTideData(data));
+  renderChart($chart, data);
 }
 
 function request(path) {
@@ -262,7 +303,7 @@ function fetchTideData(id) {
   return new Promise(resolve => {
     const path = CONFIG.tideDataPath + id;
     request(path).then(data => {
-      resolve(data);
+      resolve(normalizeTideData(data));
     });
   });
 }
@@ -306,6 +347,10 @@ document.querySelector('form').addEventListener('submit', (event) => {
 
 window.addEventListener('popstate', (event) => {
   if (event.state) loadFromState(event.state);
+});
+
+window.addEventListener('resize', () => {
+  if (history.state && history.state.tideData) renderChart($chart, history.state.tideData);
 });
 
 function isSameDay(a, b) {

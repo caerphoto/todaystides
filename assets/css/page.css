@@ -20,13 +20,17 @@ body {
   margin-bottom: 1.5em;
 }
 
+label {
+  margin-right: 0.5em;
+}
+
 button,
 input {
   -webkit-appearance: none;
   appearance: none;
   font: inherit;
   border: 1px solid rgba(0, 0, 0, 0.3);
-  margin: 0 0.5em;
+  margin: 0;
 }
 
 button {
@@ -44,6 +48,7 @@ button:hover {
 input[type="text"],
 input[type="search"] {
   box-shadow: inset 1px 1px 3px 0 rgba(0, 0, 0, 0.2);
+  width: 15em;
   padding: 0.2em 0.3em;
 }
 
@@ -83,24 +88,17 @@ input[type="search"]:focus {
   margin: 0;
 }
 
-#tides {
-  overflow: hidden;
-  --chart-height: 14rem;
-  height: calc(var(--chart-height) + 6em);
-  --border-color: rgba(0, 0, 0, 0.3);
-}
-
 #tides h2 {
   font-size: 1.1rem;
   font-weight: normal;
-  height: 2rem;
-  margin: 0;
+  margin: 0 0 0.5rem;
 }
 
 #tides canvas {
   box-sizing: border-box;
   width: 100%;
-  height: var(--chart-height);
+  height: 15em;
+  margin: 0 0 0.5rem;
 }
 
 #tides p.axis-label {
