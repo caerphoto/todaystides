@@ -104,6 +104,7 @@ async function getStationData(stationId) {
 function fetchAsset(path, response) {
   const contentType = MIME.contentType(PATH.extname(path)) || 'application/octet-stream';
   response.setHeader('Content-Type', contentType);
+
   const stream = FS.createReadStream(path);
   stream.on('error', () => render404(response, path));
   stream.on('data', (data) => response.write(data));
@@ -123,8 +124,9 @@ function fetchPage(response, stationId) {
       }
 
       response.setHeader('Content-Type', 'text/html; charset=utf-8');
-      const pathReplacer = new RegExp('#BASE_PATH#', 'g');
-      pageText = pageText.replace(pathReplacer, CONFIG.basePath);
+      pageText = pageText.replace(/#BASE_PATH#/g, CONFIG.basePath);
+      pageText = pageText.replace(/#CSS-HASH#/g, CONFIG.assetHashes.css || '');
+      pageText = pageText.replace(/#JS-HASH#/g, CONFIG.assetHashes.js || '');
 
       getStationData(stationId).then(stationData => {
         pageText = pageText.replace('#STATION_DATA#', JSON.stringify(stationData));
@@ -138,6 +140,24 @@ async function render404(response, notFoundPath) {
   console.log(' ! Unable to find', notFoundPath);
   response.statusCode = 404;
   response.end('Not found');
+}
+
+function initAssetHashes() {
+  if (MODE === 'development') {
+    CONFIG.assetHashes = {
+      css: '',
+      js: ''
+    };
+  } else {
+    const cssName = FS.readdirSync('build/css')[0];
+    const jsName = FS.readdirSync('build/javascript')[0];
+    CONFIG.assetHashes = {
+      css: cssName.match(/(\.\d+)\.css/)[1],
+      js: jsName.match(/(\.\d+)\.min\.js/)[1]
+    };
+  }
+
+  console.log(CONFIG);
 }
 
 function requestDispatcher(request, response) {
@@ -180,6 +200,8 @@ function requestDispatcher(request, response) {
       render404(response, href);
   }
 }
+
+initAssetHashes();
 
 require('http').createServer(function (request, response) {
   request.addListener('end', () => requestDispatcher(request, response)).resume();
