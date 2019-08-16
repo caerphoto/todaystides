@@ -310,7 +310,7 @@ function fetchTideData(id) {
 
 function loadFromState(state) {
   window.title = makeTitle(state.Name);
-  renderTideData(state.tideData, state.Name);
+  renderTideData(normalizeTideData(state.tideData), state.Name);
 }
 
 $search.addEventListener('input', (event) => {
