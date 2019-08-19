@@ -191,7 +191,7 @@ function requestDispatcher(request, response) {
       getTides(url.query.id).then(data => {
         response.setHeader('Content-Type', 'application/json; charset=utf-8');
         response.end(JSON.stringify(data));
-        console.log(` > Served tide data station ID "${url.query.id}"`);
+        console.log(` > Served tide data for station ID "${url.query.id}"`);
       });
       break;
     default:

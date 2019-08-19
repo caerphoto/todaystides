@@ -10,7 +10,7 @@ const ONE_DAY = 1000 * 60 * 60 * 24;
 const LABEL_SIZE = 30;
 const QUADRATIC_WEIGHT = 60;
 const now = new Date();
-const DAYS = 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday'.split(' ');
+const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
 
 let searchTimer = null;
 
@@ -93,7 +93,7 @@ function renderTidesLoading() {
 }
 
 function humanizeDate(date) {
-  return DAYS[date.getDay() - 1] + '’s';
+  return DAYS[date.getDay()] + '’s';
 }
 
 function makeChartHeading(stationName) {
