@@ -4,7 +4,6 @@ const $search = $('#station-name');
 const $results = $('#found-stations');
 const $tides = $('#tides');
 const $searching = $('#searching-spinner');
-const $loadingTides = $('#tides-spinner');
 
 const ONE_DAY = 1000 * 60 * 60 * 24;
 const LABEL_SIZE = 30;
@@ -48,8 +47,8 @@ function createResultItem(station) {
   const normalizedName = normalizeStationName(station.Name);
 
   $li.classList.add('found-station');
-  $li.dataset.id = station.Id;
-  $li.dataset.name = normalizedName;
+  $li.dataset.Id = station.Id;
+  $li.dataset.Name = normalizedName;
 
   appendTextTo($btn, normalizedName);
   $btn.type = 'button';
@@ -258,6 +257,14 @@ function renderChart($canvas, data) {
   return $canvas;
 }
 
+function renderRefresh() {
+  const $button = createEl('button');
+  appendTextTo($button, 'Refresh Chart');
+  $button.id = 'refresh-button';
+  $button.type = 'button';
+  $tides.appendChild($button);
+}
+
 function renderTideData(data, stationName) {
   const $frag = document.createDocumentFragment();
   const $info = makeChartHeading(stationName);
@@ -276,6 +283,7 @@ function renderTideData(data, stationName) {
 
   $tides.appendChild($frag);
   renderChart($chart, data);
+  renderRefresh();
 }
 
 function request(path) {
@@ -299,11 +307,13 @@ function findStations(name) {
   });
 }
 
-function fetchTideData(id) {
+function fetchTideData(stationData) {
+  const newData = Object.assign({}, stationData);
   return new Promise(resolve => {
-    const path = CONFIG.tideDataPath + id;
+    const path = CONFIG.tideDataPath + newData.Id;
     request(path).then(data => {
-      resolve(normalizeTideData(data));
+      newData.tideData = normalizeTideData(data);
+      resolve(newData);
     });
   });
 }
@@ -311,6 +321,12 @@ function fetchTideData(id) {
 function loadFromState(state) {
   window.title = makeTitle(state.Name);
   renderTideData(normalizeTideData(state.tideData), state.Name);
+}
+
+function handleTideResponse(stationData) {
+  if (stationData.tideData.error) return alert(stationData.tideData.error);
+  loadFromState(stationData);
+  history.pushState(stationData, makeTitle(stationData.Name), makeUrl(stationData.Id));
 }
 
 $search.addEventListener('input', (event) => {
@@ -326,23 +342,23 @@ $search.addEventListener('input', (event) => {
 });
 
 $results.addEventListener('click', (event) => {
-  const $li = event.target.closest('li.found-station');
+  const stationData = Object.assign(
+    {},
+    event.target.closest('li.found-station').dataset
+  );
   renderTidesLoading();
-  fetchTideData($li.dataset.id).then(tideData => {
-    if (tideData.error) return alert(tideData.error);
-
-    const historyData = {
-      Name: $li.dataset.name,
-      Id: $li.dataset.id,
-      tideData: tideData
-    };
-    loadFromState(historyData);
-    history.pushState(historyData, makeTitle($li.dataset.name), makeUrl($li.dataset.id));
-  });
+  fetchTideData(stationData).then(handleTideResponse);
 });
 
 document.querySelector('form').addEventListener('submit', (event) => {
   event.preventDefault();
+});
+
+$tides.addEventListener('click', (event) => {
+  if (!event.target.matches('#refresh-button')) return;
+  event.preventDefault();
+  renderTidesLoading();
+  fetchTideData(history.state).then(handleTideResponse);
 });
 
 window.addEventListener('popstate', (event) => {
@@ -365,14 +381,7 @@ if (history.state && isSameDay(now, history.state.tideData[0].DateTime)) {
   loadFromState(history.state);
 } else if (CONFIG.stationData ) {
   const data = CONFIG.stationData;
-
-  fetchTideData(data.Id).then(tideData => {
-    if (tideData.error) return alert(tideData.error);
-
-    data.tideData = tideData;
-    history.replaceState(data, makeTitle(data.Name), makeUrl(data.Id));
-    loadFromState(data);
-  });
+  fetchTideData(data).then(handleTideResponse);
 }
 
 $search.focus();
