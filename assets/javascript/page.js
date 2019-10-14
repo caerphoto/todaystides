@@ -192,8 +192,11 @@ function renderLabel(ctx, text, x, y, chartWidth, isLowTide) {
     chartWidth - textWidth / 2
   );
 
+  const verticalPadding = 9;
+
+  ctx.font = `${LABEL_SIZE / 17}em sans-serif`;
   ctx.fillStyle = isLowTide ? LOW_TIDE_LABEL : HIGH_TIDE_LABEL;
-  ctx.fillRect(boundX - (textWidth / 2) - 2, y - 1, textWidth + 4, LABEL_SIZE + 25);
+  ctx.fillRect(boundX - (textWidth / 2) - 2, y - 1, textWidth + 4, LABEL_SIZE + verticalPadding);
   ctx.fillStyle = '#444';
   ctx.fillText(text, boundX, y + 2);
 }
