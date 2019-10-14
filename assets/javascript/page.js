@@ -10,6 +10,10 @@ const LABEL_SIZE = 30;
 const QUADRATIC_WEIGHT = 60;
 const now = new Date();
 const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
+// const SHORT_DAYS = 'Sun Mon Tue Wed Thu Fri Sat'.split(' ');
+const GRID_COLOR = 'rgba(0, 0, 85, 0.3)';
+const LOW_TIDE_LABEL = '#F7F2E1';
+const HIGH_TIDE_LABEL = '#D8E2F7';
 
 let searchTimer = null;
 
@@ -83,6 +87,15 @@ function normalizeTideData(data) {
   return normalized;
 }
 
+function ordinalDate(date) {
+  const d = typeof date === 'object' ? date.getDate().toString() : date.toString();
+  return d + ({
+    '1': 'st',
+    '2': 'nd',
+    '3': 'rd'
+  }[d.slice(-1)] || 'th');
+}
+
 function pad(num) {
   return num < 10 ? '0' + num : num;
 }
@@ -125,11 +138,17 @@ function xFromTime(time, chartWidth) {
   const midnight = dateAtMidnight(time).getTime();
   const offset = time.getTime() - midnight;
   const padding = 20;
-  return offset * ((chartWidth - LABEL_SIZE - padding) / ONE_DAY) + LABEL_SIZE + padding;
+  const x = offset *
+    ((chartWidth - LABEL_SIZE - padding) / ONE_DAY) +
+    LABEL_SIZE + padding;
+
+  // Ensure lines are exactly on pixel boundaries
+  return Math.round(x) + 0.5;
 }
 
 function yFromTide(tideHeight, chartHeight, maxHeight) {
-  return chartHeight - (tideHeight * (chartHeight / maxHeight)) - LABEL_SIZE;
+  const y = chartHeight - (tideHeight * (chartHeight / maxHeight)) - LABEL_SIZE;
+  return Math.round(y) + 0.5;
 }
 
 function renderChartAxes(ctx, yMax, chartHeight, chartWidth) {
@@ -138,7 +157,7 @@ function renderChartAxes(ctx, yMax, chartHeight, chartWidth) {
   ctx.fillStyle = '#888';
 
   ctx.beginPath();
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.strokeStyle = GRID_COLOR;
 
   // Y axis
   ctx.textBaseline = 'middle';
@@ -166,15 +185,15 @@ function renderChartAxes(ctx, yMax, chartHeight, chartWidth) {
   ctx.stroke();
 }
 
-function renderLabel(ctx, text, x, y, chartWidth) {
+function renderLabel(ctx, text, x, y, chartWidth, isLowTide) {
   const textWidth = ctx.measureText(text).width + 6;
   const boundX = Math.min(
     Math.max(x, textWidth / 2),
     chartWidth - textWidth / 2
   );
 
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(boundX - textWidth / 2, y, textWidth, LABEL_SIZE);
+  ctx.fillStyle = isLowTide ? LOW_TIDE_LABEL : HIGH_TIDE_LABEL;
+  ctx.fillRect(boundX - (textWidth / 2) - 2, y - 2, textWidth + 4, LABEL_SIZE + 4);
   ctx.fillStyle = '#444';
   ctx.fillText(text, boundX, y + 2);
 }
@@ -182,6 +201,7 @@ function renderLabel(ctx, text, x, y, chartWidth) {
 function getLabelText(height, time) {
   const hour = pad(time.getHours());
   const minute = pad(time.getMinutes());
+  // return `${height.toFixed(2)}m @ ${hour}:${minute} (${SHORT_DAYS[time.getDay()]} ${ordinalDate(time)})`;
   return `${height.toFixed(2)}m @ ${hour}:${minute}`;
 }
 
@@ -244,9 +264,9 @@ function renderChart($canvas, data) {
 
     renderTick(ctx, x, y, isLow);
     if (isLow) {
-      renderLabel(ctx, label, x, y + 2, width);
+      renderLabel(ctx, label, x, y + 2, width, isLow);
     } else {
-      renderLabel(ctx, label, x, y - fontSize - 6, width);
+      renderLabel(ctx, label, x, y - fontSize - 6, width, isLow);
     }
 
     prevX = x;

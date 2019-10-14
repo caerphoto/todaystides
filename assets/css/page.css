@@ -1,10 +1,11 @@
 html {
   margin: 0;
   padding: 0;
+  background-image: url('../img/white-waves.png');
 }
 
 body {
-  color: #333;
+  color: #258;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
     "Droid Sans", "Helvetica Neue", sans-serif;
@@ -14,9 +15,23 @@ body {
   max-width: 40em;
 }
 
+#horizon {
+  /* background gradient overlaid on <html> element's wave pattern image */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: -moz-linear-gradient(top,  rgba(232,244,255,0.4) 0%, rgba(209,233,255,0.4) 36%, rgba(212,249,233,0.4) 50%, rgba(242,219,167,0.4) 52%, rgba(255,247,211,0.4) 70%, rgba(255,253,247,0.4) 100%);
+  background: -webkit-linear-gradient(top,  rgba(232,244,255,0.4) 0%,rgba(209,233,255,0.4) 36%,rgba(212,249,233,0.4) 50%,rgba(242,219,167,0.4) 52%,rgba(255,247,211,0.4) 70%,rgba(255,253,247,0.4) 100%);
+  background: linear-gradient(to bottom,  rgba(232,244,255,0.4) 0%,rgba(209,233,255,0.4) 36%,rgba(212,249,233,0.4) 50%,rgba(242,219,167,0.4) 52%,rgba(255,247,211,0.4) 70%,rgba(255,253,247,0.4) 100%);
+
+  z-index: -1;
+}
+
 .main {
   padding-bottom: 2em;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 85, 0.2);
   margin-bottom: 1.5em;
 }
 
@@ -105,4 +120,8 @@ input[type="search"]:focus {
   text-align: center;
   margin: 0;
   padding: 0;
+}
+
+footer p {
+  color: rgba(0, 0, 85, 0.6);
 }
