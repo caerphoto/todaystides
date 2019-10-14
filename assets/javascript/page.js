@@ -193,7 +193,7 @@ function renderLabel(ctx, text, x, y, chartWidth, isLowTide) {
   );
 
   ctx.fillStyle = isLowTide ? LOW_TIDE_LABEL : HIGH_TIDE_LABEL;
-  ctx.fillRect(boundX - (textWidth / 2) - 2, y - 1, textWidth + 4, LABEL_SIZE + 5);
+  ctx.fillRect(boundX - (textWidth / 2) - 2, y - 1, textWidth + 4, LABEL_SIZE + 25);
   ctx.fillStyle = '#444';
   ctx.fillText(text, boundX, y + 2);
 }
