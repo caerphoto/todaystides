@@ -12,6 +12,7 @@ const now = new Date();
 const DAYS = 'Sunday Monday Tuesday Wednesday Thursday Friday Saturday'.split(' ');
 // const SHORT_DAYS = 'Sun Mon Tue Wed Thu Fri Sat'.split(' ');
 const GRID_COLOR = 'rgba(0, 0, 85, 0.3)';
+const CURRENT_TIME_COLOR = '#FF0000';
 const LOW_TIDE_LABEL = '#F7F2E1';
 const HIGH_TIDE_LABEL = '#D8E2F7';
 
@@ -158,6 +159,7 @@ function renderChartAxes(ctx, yMax, chartHeight, chartWidth) {
 
   ctx.beginPath();
   ctx.strokeStyle = GRID_COLOR;
+  ctx.lineWidth = 1;
 
   // Y axis
   ctx.textBaseline = 'middle';
@@ -182,6 +184,17 @@ function renderChartAxes(ctx, yMax, chartHeight, chartWidth) {
     ctx.fillText(pad(hour), x, chartHeight + 4);
   }
 
+  ctx.stroke();
+}
+
+function renderCurrentTimeMark(ctx, chartWidth, chartHeight) {
+  const time = new Date();
+  const x = xFromTime(time, chartWidth);
+  ctx.beginPath();
+  ctx.strokeStyle = CURRENT_TIME_COLOR;
+  ctx.lineWidth = 2;
+  ctx.moveTo(x, 0);
+  ctx.lineTo(x, chartHeight - LABEL_SIZE);
   ctx.stroke();
 }
 
@@ -247,6 +260,7 @@ function renderChart($canvas, data) {
   ctx.clearRect(0, 0, width, height);
 
   renderChartAxes(ctx, chartYMax, height, width);
+  renderCurrentTimeMark(ctx, width, height);
 
   prepareContextForChart(ctx);
   data.forEach((item, index) => {
