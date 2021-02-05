@@ -422,3 +422,9 @@ if (history.state && isSameDay(now, history.state.tideData[0].DateTime)) {
 }
 
 $search.focus();
+
+if (history.state && history.state.tideData) {
+    setInterval(() => {
+        renderChart($chart, history.state.tideData);
+    }, 60000);
+}
